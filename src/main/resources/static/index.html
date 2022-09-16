@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+	<head>
+<!--		<link rel="stylesheet" href="/leaflet/leaflet.css" />-->
+<!--		<link rel="stylesheet" href="/webjars/bootstrap/css/bootstrap.min.css">-->
+<!--		<script src="/leaflet/leaflet.js"></script>	-->
+<!--		<script src="/leaflet-movingmarker/MovingMarker.js"></script>	-->
+    	<script src="/webjars/jquery/jquery.min.js"></script>
+   	 	<script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    	<script src="/webjars/stomp-websocket/stomp.min.js"></script>
+    	<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+		<link href="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.css" rel="stylesheet">
+		<script src="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.js"></script>
+		<script src="https://api.tiles.mapbox.com/mapbox.js/plugins/turf/v2.0.0/turf.min.js"></script>
+		<script src="https://kit.fontawesome.com/4a0a1644a8.js" crossorigin="anonymous"></script>
+		<link rel="stylesheet" href="index.css">
+    	<script src="/app.js"></script>
+		
+	</head>
+	<body>
+		<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.js"></script>
+		<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.css" type="text/css">
+		<div class="row">
+		    <!-- A card with given width -->
+		    <div class="column">
+		        <div class="map" id="driver1_map"></div>
+				<div class="overlay">
+				    <button class="delivered" id="driver1_delivered"><i class="fa-solid fa-thumbs-up"></i>Delivered</button>
+				    <button class="not_delivered" id="driver1_not_delivered"><i class="fa-solid fa-thumbs-down"></i>Not delivered</button>
+				    <button class="stopped" id="driver1_stopped"><i class="fa-solid fa-hand"></i>Stopped</button>
+				    <button class="accident" id="driver1_accident"><i class="fa-solid fa-warning"></i>Accident</button>
+				</div>
+		    </div>
+			<div class="column">
+		        <div class="map" id="driver2_map"></div>
+				<div class="overlay">
+					<button class="delivered" id="driver2_delivered"><i class="fa-solid fa-thumbs-up"></i>Delivered</button>
+				    <button class="not_delivered" id="driver2_not_delivered"><i class="fa-solid fa-thumbs-down"></i>Not delivered</button>
+				    <button class="stopped" id="driver2_stopped"><i class="fa-solid fa-hand"></i>Stopped</button>
+				    <button class="accident" id="driver2_accident"><i class="fa-solid fa-warning"></i>Accident</button>
+				</div>
+		    </div>
+		    <div class="column">
+		        <div class="map" id="driver3_map"></div>
+				<div class="overlay">
+					<button class="delivered" id="driver3_delivered"><i class="fa-solid fa-thumbs-up"></i>Delivered</button>
+				    <button class="not_delivered" id="driver3_not_delivered"><i class="fa-solid fa-thumbs-down"></i>Not delivered</button>
+				    <button class="stopped" id="driver3_stopped"><i class="fa-solid fa-hand"></i>Stopped</button>
+				    <button class="accident" id="driver3_accident"><i class="fa-solid fa-warning"></i>Accident</button>
+				</div>
+		    </div>
+		    <div class="column">
+		        <div class="map" id="driver4_map"></div>
+				<div class="overlay">
+					<button class="delivered" id="driver4_delivered"><i class="fa-solid fa-thumbs-up"></i>Delivered</button>
+				    <button class="not_delivered" id="driver4_not_delivered"><i class="fa-solid fa-thumbs-down"></i>Not delivered</button>
+				    <button class="stopped" id="driver4_stopped"><i class="fa-solid fa-hand"></i>Stopped</button>
+				    <button class="accident" id="driver4_accident"><i class="fa-solid fa-warning"></i>Accident</button>
+				</div>
+		    </div>
+		    <div class="column">
+		        <div class="map" id="driver5_map"></div>
+				<div class="overlay">
+					<button class="delivered" id="driver5_delivered"><i class="fa-solid fa-thumbs-up"></i>Delivered</button>
+				    <button class="not_delivered" id="driver5_not_delivered"><i class="fa-solid fa-thumbs-down"></i>Not delivered</button>
+				    <button class="stopped" id="driver5_stopped"><i class="fa-solid fa-hand"></i>Stopped</button>
+				    <button class="accident" id="driver5_accident"><i class="fa-solid fa-warning"></i>Accident</button>
+				</div>
+		    </div>
+		    <div class="column">
+		        <div class="map" id="driver6_map"></div>
+				<div class="overlay">
+					<button class="delivered" id="driver6_delivered"><i class="fa-solid fa-thumbs-up"></i>Delivered</button>
+				    <button class="not_delivered" id="driver6_not_delivered"><i class="fa-solid fa-thumbs-down"></i>Not delivered</button>
+				    <button class="stopped" id="driver6_stopped"><i class="fa-duotone fa-hand"></i>Stopped</button>
+				    <button class="accident" id="driver6_accident"><i class="fa-solid fa-warning"></i>Accident</button>
+				</div>
+		    </div>
+		    <!-- Repeat other cards -->
+		    ...
+		</div>
+		
+		
+<!--		<script type="text/javascript">-->
+<!--      		var map = L.map('map').setView([47.61586036846092,-122.3447647997045], 13);-->
+<!--      		L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {-->
+<!--    			maxZoom: 19,-->
+<!--    			attribution: '© OpenStreetMap'-->
+<!--			}).addTo(map);-->
+<!--    	</script>-->
+	</body>
+</html>
