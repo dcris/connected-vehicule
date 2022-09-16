@@ -119,6 +119,11 @@ document.addEventListener('DOMContentLoaded', function(event){
 	renderMapDriver6();
 	
 	addEventListenerDriver1();
+	addEventListenerDriver2();
+	addEventListenerDriver3();
+	addEventListenerDriver4();
+	addEventListenerDriver5();
+	addEventListenerDriver6();
 });
 
 
