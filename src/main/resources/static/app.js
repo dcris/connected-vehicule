@@ -6,6 +6,8 @@ var driver1_path = null;
 var driver1_temp_coordinates = [];
 var driver1_drive_step = 0.0004
 var driver1_delivering = false;
+var driver1_stopped = false;
+var driver1_accident = false;
 
 // Driver 2 
 var driver2_map = null;
@@ -13,6 +15,9 @@ var driver2_marker = null;
 var driver2_path = null;
 var driver2_temp_coordinates = [];
 var driver2_drive_step = 0.0004;
+var driver2_delivering = false;
+var driver2_stopped = false;
+var driver2_accident = false;
 
 // Driver 3 
 var driver3_map = null;
@@ -20,6 +25,9 @@ var driver3_marker = null;
 var driver3_path = null;
 var driver3_temp_coordinates = [];
 var driver3_drive_step = 0.0004;
+var driver3_delivering = false;
+var driver3_stopped = false;
+var driver3_accident = false;
 
 // Driver 4 
 var driver4_map = null;
@@ -27,6 +35,9 @@ var driver4_marker = null;
 var driver4_path = null;
 var driver4_temp_coordinates = [];
 var driver4_drive_step = 0.0004;
+var driver4_delivering = false;
+var driver4_stopped = false;
+var driver4_accident = false;
 
 // Driver 5 
 var driver5_map = null;
@@ -34,6 +45,9 @@ var driver5_marker = null;
 var driver5_path = null;
 var driver5_temp_coordinates = [];
 var driver5_drive_step = 0.0004;
+var driver5_delivering = false;
+var driver5_stopped = false;
+var driver5_accident = false;
 
 // Driver 6 
 var driver6_map = null;
@@ -41,6 +55,9 @@ var driver6_marker = null;
 var driver6_path = null;
 var driver6_temp_coordinates = [];
 var driver6_drive_step = 0.0004;
+var driver6_delivering = false;
+var driver6_stopped = false;
+var driver6_accident = false;
 
 // Styling for the line on the map
 var drive_line_paint = {
@@ -126,7 +143,7 @@ function renderMapDriver1(){
 		driver1_map.setFog({}); // Set the default atmosphere style
 	});
 	const el = document.createElement('div');
-	el.className = 'truck_martker';
+	el.className = 'truck1_martker';
 	driver1_marker = new mapboxgl.Marker(el)
 		.setLngLat(origin)
 		.addTo(driver1_map);
@@ -161,7 +178,7 @@ function driver1_drawRoute () {
 	
 	//pathLength = turf.lineDistance(path, 'miles')
 	//steps=Math.floor(pathLength/drive_step)
-	if(driver1_delivering) {
+	if(driver1_delivering || driver1_stopped || driver1_accident) {
 		driver1_drive_step = driver1_drive_step;
 	} else {
 		driver1_drive_step = driver1_drive_step + Math.random()/10000;
@@ -209,39 +226,67 @@ function driver1_drawRoute () {
 	  	  });
 	}
 
-	if(driver1_temp_coordinates[driver1_temp_coordinates.length-1][1] !=2.295642 || driver1_temp_coordinates[driver1_temp_coordinates.length-1][0] != 48.874198) {
+	if(!driver1_accident && (driver1_temp_coordinates[driver1_temp_coordinates.length-1][1] !=2.295642 || driver1_temp_coordinates[driver1_temp_coordinates.length-1][0] != 48.874198)) {
 		  requestAnimationFrame(driver1_drawRoute);
 	}	 
 }
 
 function addEventListenerDriver1(){
 	document.getElementById("driver1_delivered").addEventListener("click", function(event) {
-		driver1_delivering = true;
-		//<a href="https://www.flaticon.com/free-icons/truck" title="truck icons">Truck icons created by Freepik - Flaticon</a>
-		const el = document.createElement('div');
-		el.className = 'delivery_martker';
-  		// make a marker for each feature and add to the map
-		new mapboxgl.Marker(el).setLngLat(driver1_temp_coordinates[driver1_temp_coordinates.length-1]).addTo(driver1_map);
-		deliveringDriver1();
+		if(!driver1_delivering && !driver1_stopped && !driver1_accident) {
+			driver1_delivering = true;
+			const el = document.createElement('div');
+			el.className = 'delivery_martker';
+	  		// make a marker for each feature and add to the map
+			new mapboxgl.Marker(el).setLngLat(driver1_temp_coordinates[driver1_temp_coordinates.length-1]).addTo(driver1_map);
+			deliveringDriver1();
+		}
 	});
 	
-	/*document.getElementById('driver1_not_delivered').click(function(event) {
-		
+	document.getElementById('driver1_not_delivered').addEventListener("click", function(event) {	
+		if(!driver1_delivering && !driver1_stopped && !driver1_accident) {
+			driver1_delivering = true;
+			const el = document.createElement('div');
+			el.className = 'delivery_failure_martker';
+	  		// make a marker for each feature and add to the map
+			new mapboxgl.Marker(el).setLngLat(driver1_temp_coordinates[driver1_temp_coordinates.length-1]).addTo(driver1_map);
+			deliveringDriver1();
+		}
 	});
 	
-	document.getElementById('').click(function(event) {
-		
+	document.getElementById('driver1_stopped').addEventListener("click", function(event) {
+		if(!driver1_delivering && !driver1_stopped && !driver1_accident) {
+			driver1_stopped = true;
+			const el = document.createElement('div');
+			el.className = 'stopped_martker';
+	  		// make a marker for each feature and add to the map
+			new mapboxgl.Marker(el).setLngLat(driver1_temp_coordinates[driver1_temp_coordinates.length-1]).addTo(driver1_map);
+			stoppedDriver1();
+		}
 	});
 	
-	document.getElementById('').click(function(event) {
-		
-	});*/
+	document.getElementById('driver1_accident').addEventListener("click", function(event) {
+		if(!driver1_delivering && !driver1_stopped && !driver1_accident) {
+			driver1_accident = true;
+			const el = document.createElement('div');
+			el.className = 'accident_martker';
+	  		// make a marker for each feature and add to the map
+			new mapboxgl.Marker(el).setLngLat(driver1_temp_coordinates[driver1_temp_coordinates.length-1]).addTo(driver1_map);
+		}
+	});
 }
 
 async function deliveringDriver1() {
 	var millisecondsToWait = Math.floor(Math.random() * 100001);
 	setTimeout(function() {
 	    driver1_delivering = false;
+	}, millisecondsToWait);
+}
+
+async function stoppedDriver1() {
+	var millisecondsToWait = Math.floor(Math.random() * 100001);
+	setTimeout(function() {
+	    driver1_stopped = false;
 	}, millisecondsToWait);
 }
 
@@ -266,7 +311,9 @@ function renderMapDriver2(){
 		driver2_map.setFog({}); // Set the default atmosphere style
 	});
 	
-	driver2_marker = new mapboxgl.Marker()
+	const el = document.createElement('div');
+	el.className = 'truck2_martker';
+	driver2_marker = new mapboxgl.Marker(el)
 		.setLngLat(origin)
 		.addTo(driver2_map);
 
@@ -300,7 +347,11 @@ function driver2_drawRoute () {
 	
 	//pathLength = turf.lineDistance(path, 'miles')
 	//steps=Math.floor(pathLength/drive_step)
-	driver2_drive_step = driver2_drive_step + Math.random()/10000
+	if(driver2_delivering || driver2_stopped || driver2_accident) {
+		driver2_drive_step = driver2_drive_step;
+	} else {
+		driver2_drive_step = driver2_drive_step + Math.random()/10000;
+	}
 	nextPoint= turf.along(driver2_path, driver2_drive_step , 'miles')
 	driver2_temp_coordinates.push( nextPoint.geometry.coordinates )
 	
@@ -343,11 +394,72 @@ function driver2_drawRoute () {
 	  	  });
 	}
 
-	if(driver2_temp_coordinates[driver2_temp_coordinates.length-1][1] !=2.365265 || driver2_temp_coordinates[driver2_temp_coordinates.length-1][0] != 48.864840) {
+	if(!driver2_accident && (driver2_temp_coordinates[driver2_temp_coordinates.length-1][1] !=2.365265 || driver2_temp_coordinates[driver2_temp_coordinates.length-1][0] != 48.864840)) {
 		  requestAnimationFrame(driver2_drawRoute);
 	}	 
 }
 
+function addEventListenerDriver2(){
+	document.getElementById("driver2_delivered").addEventListener("click", function(event) {
+		if(!driver2_delivering && !driver2_stopped && !driver2_accident) {
+			driver2_delivering = true;
+			//<a href="https://www.flaticon.com/free-icons/truck" title="truck icons">Truck icons created by Freepik - Flaticon</a>
+			const el = document.createElement('div');
+			el.className = 'delivery_martker';
+	  		// make a marker for each feature and add to the map
+			new mapboxgl.Marker(el).setLngLat(driver2_temp_coordinates[driver2_temp_coordinates.length-1]).addTo(driver2_map);
+			deliveringDriver2();
+		}
+	});
+	
+	document.getElementById('driver2_not_delivered').addEventListener("click", function(event) {	
+		if(!driver2_delivering && !driver2_stopped && !driver2_accident) {
+			driver2_delivering = true;
+			//<a href="https://www.flaticon.com/free-icons/truck" title="truck icons">Truck icons created by Freepik - Flaticon</a>
+			const el = document.createElement('div');
+			el.className = 'delivery_failure_martker';
+	  		// make a marker for each feature and add to the map
+			new mapboxgl.Marker(el).setLngLat(driver2_temp_coordinates[driver2_temp_coordinates.length-1]).addTo(driver2_map);
+			deliveringDriver2();
+		}
+	});
+	
+	document.getElementById('driver2_stopped').addEventListener("click", function(event) {
+		if(!driver2_delivering && !driver2_stopped && !driver2_accident) {
+			driver2_stopped = true;
+			//<a href="https://www.flaticon.com/free-icons/truck" title="truck icons">Truck icons created by Freepik - Flaticon</a>
+			const el = document.createElement('div');
+			el.className = 'stopped_martker';
+	  		// make a marker for each feature and add to the map
+			new mapboxgl.Marker(el).setLngLat(driver2_temp_coordinates[driver2_temp_coordinates.length-1]).addTo(driver2_map);
+			stoppedDriver2();
+		}
+	});
+	
+	document.getElementById('driver2_accident').addEventListener("click", function(event) {
+		if(!driver2_delivering && !driver2_stopped && !driver2_accident) {
+			driver2_accident = true;
+			const el = document.createElement('div');
+			el.className = 'accident_martker';
+	  		// make a marker for each feature and add to the map
+			new mapboxgl.Marker(el).setLngLat(driver2_temp_coordinates[driver2_temp_coordinates.length-1]).addTo(driver2_map);
+		}
+	});
+}
+
+async function deliveringDriver2() {
+	var millisecondsToWait = Math.floor(Math.random() * 100001);
+	setTimeout(function() {
+	    driver2_delivering = false;
+	}, millisecondsToWait);
+}
+
+async function stoppedDriver2() {
+	var millisecondsToWait = Math.floor(Math.random() * 100001);
+	setTimeout(function() {
+	    driver2_stopped = false;
+	}, millisecondsToWait);
+}
 
 /*-----------------------------------------------------------------------*/
 /*                                                                       */
@@ -370,7 +482,9 @@ function renderMapDriver3(){
 		driver3_map.setFog({}); // Set the default atmosphere style
 	});
 	
-	driver3_marker = new mapboxgl.Marker()
+	const el = document.createElement('div');
+	el.className = 'truck3_martker';
+	driver3_marker = new mapboxgl.Marker(el)
 		.setLngLat(origin)
 		.addTo(driver3_map);
 
@@ -404,7 +518,11 @@ function driver3_drawRoute () {
 	
 	//pathLength = turf.lineDistance(path, 'miles')
 	//steps=Math.floor(pathLength/drive_step)
-	driver3_drive_step = driver3_drive_step + Math.random()/10000
+	if(driver3_delivering || driver3_stopped || driver3_accident) {
+		driver3_drive_step = driver3_drive_step;
+	} else {
+		driver3_drive_step = driver3_drive_step + Math.random()/10000;
+	}
 	nextPoint= turf.along(driver3_path, driver3_drive_step , 'miles')
 	driver3_temp_coordinates.push( nextPoint.geometry.coordinates )
 	
@@ -447,11 +565,69 @@ function driver3_drawRoute () {
 	  	  });
 	} 
 
-	if(driver3_temp_coordinates[driver3_temp_coordinates.length-1][1] !=2.344833 || driver3_temp_coordinates[driver3_temp_coordinates.length-1][0] != 48.890827) {
+	if(!driver3_accident && (driver3_temp_coordinates[driver3_temp_coordinates.length-1][1] !=2.344833 || driver3_temp_coordinates[driver3_temp_coordinates.length-1][0] != 48.890827)) {
 		  requestAnimationFrame(driver3_drawRoute);
 	}	 
 }
 
+function addEventListenerDriver3(){
+	document.getElementById("driver3_delivered").addEventListener("click", function(event) {
+		if(!driver3_delivering && !driver3_stopped && !driver3_accident) {
+			driver3_delivering = true;
+			const el = document.createElement('div');
+			el.className = 'delivery_martker';
+	  		// make a marker for each feature and add to the map
+			new mapboxgl.Marker(el).setLngLat(driver3_temp_coordinates[driver3_temp_coordinates.length-1]).addTo(driver3_map);
+			deliveringDriver3();
+		}
+	});
+	
+	document.getElementById('driver3_not_delivered').addEventListener("click", function(event) {	
+		if(!driver3_delivering && !driver3_stopped && !driver3_accident) {
+			driver3_delivering = true;
+			const el = document.createElement('div');
+			el.className = 'delivery_failure_martker';
+	  		// make a marker for each feature and add to the map
+			new mapboxgl.Marker(el).setLngLat(driver3_temp_coordinates[driver3_temp_coordinates.length-1]).addTo(driver3_map);
+			deliveringDriver3();
+		}
+	});
+	
+	document.getElementById('driver3_stopped').addEventListener("click", function(event) {
+		if(!driver3_delivering && !driver3_stopped && !driver3_accident) {
+			driver3_stopped = true;
+			const el = document.createElement('div');
+			el.className = 'stopped_martker';
+	  		// make a marker for each feature and add to the map
+			new mapboxgl.Marker(el).setLngLat(driver3_temp_coordinates[driver3_temp_coordinates.length-1]).addTo(driver3_map);
+			stoppedDriver3();
+		}
+	});
+	
+	document.getElementById('driver3_accident').addEventListener("click", function(event) {
+		if(!driver3_delivering && !driver3_stopped && !driver3_accident) {
+			driver3_accident = true;
+			const el = document.createElement('div');
+			el.className = 'accident_martker';
+	  		// make a marker for each feature and add to the map
+			new mapboxgl.Marker(el).setLngLat(driver3_temp_coordinates[driver3_temp_coordinates.length-1]).addTo(driver3_map);
+		}
+	});
+}
+
+async function deliveringDriver3() {
+	var millisecondsToWait = Math.floor(Math.random() * 100001);
+	setTimeout(function() {
+	    driver3_delivering = false;
+	}, millisecondsToWait);
+}
+
+async function stoppedDriver3() {
+	var millisecondsToWait = Math.floor(Math.random() * 100001);
+	setTimeout(function() {
+	    driver3_stopped = false;
+	}, millisecondsToWait);
+}
 
 /*-----------------------------------------------------------------------*/
 /*                                                                       */
@@ -474,7 +650,9 @@ function renderMapDriver4(){
 		driver4_map.setFog({}); // Set the default atmosphere style
 	});
 	
-	driver4_marker = new mapboxgl.Marker()
+	const el = document.createElement('div');
+	el.className = 'truck4_martker';
+	driver4_marker = new mapboxgl.Marker(el)
 		.setLngLat(origin)
 		.addTo(driver4_map);
 
@@ -508,7 +686,11 @@ function driver4_drawRoute () {
 	
 	//pathLength = turf.lineDistance(path, 'miles')
 	//steps=Math.floor(pathLength/drive_step)
-	driver4_drive_step = driver4_drive_step + Math.random()/10000
+	if(driver4_delivering || driver4_stopped || driver4_accident) {
+		driver4_drive_step = driver4_drive_step;
+	} else {
+		driver4_drive_step = driver4_drive_step + Math.random()/10000;
+	}
 	nextPoint= turf.along(driver4_path, driver4_drive_step , 'miles')
 	driver4_temp_coordinates.push( nextPoint.geometry.coordinates )
 	
@@ -551,11 +733,69 @@ function driver4_drawRoute () {
 	  	  });
 	}
 
-	if(driver4_temp_coordinates[driver4_temp_coordinates.length-1][1] !=2.302839 || driver4_temp_coordinates[driver4_temp_coordinates.length-1][0] != 48.838729) {
+	if(!driver4_accident && (driver4_temp_coordinates[driver4_temp_coordinates.length-1][1] !=2.302839 || driver4_temp_coordinates[driver4_temp_coordinates.length-1][0] != 48.838729)) {
 		  requestAnimationFrame(driver4_drawRoute);
 	}	 
 }
 
+function addEventListenerDriver4(){
+	document.getElementById("driver4_delivered").addEventListener("click", function(event) {
+		if(!driver4_delivering && !driver4_stopped && !driver4_accident) {
+			driver4_delivering = true;
+			const el = document.createElement('div');
+			el.className = 'delivery_martker';
+	  		// make a marker for each feature and add to the map
+			new mapboxgl.Marker(el).setLngLat(driver4_temp_coordinates[driver4_temp_coordinates.length-1]).addTo(driver4_map);
+			deliveringDriver4();
+		}
+	});
+	
+	document.getElementById('driver4_not_delivered').addEventListener("click", function(event) {	
+		if(!driver4_delivering && !driver4_stopped && !driver4_accident) {
+			driver4_delivering = true;
+			const el = document.createElement('div');
+			el.className = 'delivery_failure_martker';
+	  		// make a marker for each feature and add to the map
+			new mapboxgl.Marker(el).setLngLat(driver4_temp_coordinates[driver4_temp_coordinates.length-1]).addTo(driver4_map);
+			deliveringDriver4();
+		}
+	});
+	
+	document.getElementById('driver4_stopped').addEventListener("click", function(event) {
+		if(!driver4_delivering && !driver4_stopped && !driver4_accident) {
+			driver4_stopped = true;
+			const el = document.createElement('div');
+			el.className = 'stopped_martker';
+	  		// make a marker for each feature and add to the map
+			new mapboxgl.Marker(el).setLngLat(driver4_temp_coordinates[driver4_temp_coordinates.length-1]).addTo(driver4_map);
+			stoppedDriver4();
+		}
+	});
+	
+	document.getElementById('driver4_accident').addEventListener("click", function(event) {
+		if(!driver4_delivering && !driver4_stopped && !driver4_accident) {
+			driver4_accident = true;
+			const el = document.createElement('div');
+			el.className = 'accident_martker';
+	  		// make a marker for each feature and add to the map
+			new mapboxgl.Marker(el).setLngLat(driver4_temp_coordinates[driver4_temp_coordinates.length-1]).addTo(driver4_map);
+		}
+	});
+}
+
+async function deliveringDriver4() {
+	var millisecondsToWait = Math.floor(Math.random() * 100001);
+	setTimeout(function() {
+	    driver4_delivering = false;
+	}, millisecondsToWait);
+}
+
+async function stoppedDriver4() {
+	var millisecondsToWait = Math.floor(Math.random() * 100001);
+	setTimeout(function() {
+	    driver4_stopped = false;
+	}, millisecondsToWait);
+}
 
 /*-----------------------------------------------------------------------*/
 /*                                                                       */
@@ -578,7 +818,9 @@ function renderMapDriver5(){
 		driver5_map.setFog({}); // Set the default atmosphere style
 	});
 	
-	driver5_marker = new mapboxgl.Marker()
+	const el = document.createElement('div');
+	el.className = 'truck5_martker';
+	driver5_marker = new mapboxgl.Marker(el)
 		.setLngLat(origin)
 		.addTo(driver5_map);
 
@@ -612,7 +854,11 @@ function driver5_drawRoute () {
 	
 	//pathLength = turf.lineDistance(path, 'miles')
 	//steps=Math.floor(pathLength/drive_step)
-	driver5_drive_step = driver5_drive_step + Math.random()/10000
+	if(driver5_delivering || driver5_stopped || driver5_accident) {
+		driver5_drive_step = driver5_drive_step;
+	} else {
+		driver5_drive_step = driver5_drive_step + Math.random()/10000;
+	}
 	nextPoint= turf.along(driver5_path, driver5_drive_step , 'miles')
 	driver5_temp_coordinates.push( nextPoint.geometry.coordinates )
 	
@@ -655,11 +901,69 @@ function driver5_drawRoute () {
 	  	  });
 	}
 
-	if(driver5_temp_coordinates[driver5_temp_coordinates.length-1][1] !=2.222794 || driver5_temp_coordinates[driver5_temp_coordinates.length-1][0] != 48.870243) {
+	if(!driver5_accident && (driver5_temp_coordinates[driver5_temp_coordinates.length-1][1] !=2.222794 || driver5_temp_coordinates[driver5_temp_coordinates.length-1][0] != 48.870243)) {
 		  requestAnimationFrame(driver5_drawRoute);
 	}	 
 }
 
+function addEventListenerDriver5(){
+	document.getElementById("driver5_delivered").addEventListener("click", function(event) {
+		if(!driver5_delivering && !driver5_stopped && !driver5_accident) {
+			driver5_delivering = true;
+			const el = document.createElement('div');
+			el.className = 'delivery_martker';
+	  		// make a marker for each feature and add to the map
+			new mapboxgl.Marker(el).setLngLat(driver5_temp_coordinates[driver5_temp_coordinates.length-1]).addTo(driver5_map);
+			deliveringDriver5();
+		}
+	});
+	
+	document.getElementById('driver5_not_delivered').addEventListener("click", function(event) {	
+		if(!driver5_delivering && !driver5_stopped && !driver5_accident) {
+			driver5_delivering = true;
+			const el = document.createElement('div');
+			el.className = 'delivery_failure_martker';
+	  		// make a marker for each feature and add to the map
+			new mapboxgl.Marker(el).setLngLat(driver5_temp_coordinates[driver5_temp_coordinates.length-1]).addTo(driver5_map);
+			deliveringDriver5();
+		}
+	});
+	
+	document.getElementById('driver5_stopped').addEventListener("click", function(event) {
+		if(!driver5_delivering && !driver5_stopped && !driver5_accident) {
+			driver5_stopped = true;
+			const el = document.createElement('div');
+			el.className = 'stopped_martker';
+	  		// make a marker for each feature and add to the map
+			new mapboxgl.Marker(el).setLngLat(driver5_temp_coordinates[driver5_temp_coordinates.length-1]).addTo(driver5_map);
+			stoppedDriver5();
+		}
+	});
+	
+	document.getElementById('driver5_accident').addEventListener("click", function(event) {
+		if(!driver5_delivering && !driver5_stopped && !driver5_accident) {
+			driver5_accident = true;
+			const el = document.createElement('div');
+			el.className = 'accident_martker';
+	  		// make a marker for each feature and add to the map
+			new mapboxgl.Marker(el).setLngLat(driver5_temp_coordinates[driver5_temp_coordinates.length-1]).addTo(driver5_map);
+		}
+	});
+}
+
+async function deliveringDriver5() {
+	var millisecondsToWait = Math.floor(Math.random() * 100001);
+	setTimeout(function() {
+	    driver5_delivering = false;
+	}, millisecondsToWait);
+}
+
+async function stoppedDriver5() {
+	var millisecondsToWait = Math.floor(Math.random() * 100001);
+	setTimeout(function() {
+	    driver5_stopped = false;
+	}, millisecondsToWait);
+}
 
 /*-----------------------------------------------------------------------*/
 /*                                                                       */
@@ -682,7 +986,9 @@ function renderMapDriver6(){
 		driver6_map.setFog({}); // Set the default atmosphere style
 	});
 	
-	driver6_marker = new mapboxgl.Marker()
+	const el = document.createElement('div');
+	el.className = 'truck6_martker';
+	driver6_marker = new mapboxgl.Marker(el)
 		.setLngLat(origin)
 		.addTo(driver6_map);
 
@@ -716,7 +1022,11 @@ function driver6_drawRoute () {
 	
 	//pathLength = turf.lineDistance(path, 'miles')
 	//steps=Math.floor(pathLength/drive_step)
-	driver6_drive_step = driver6_drive_step + Math.random()/10000
+	if(driver6_delivering || driver6_stopped || driver6_accident) {
+		driver6_drive_step = driver6_drive_step;
+	} else {
+		driver6_drive_step = driver6_drive_step + Math.random()/10000;
+	}
 	nextPoint= turf.along(driver6_path, driver6_drive_step , 'miles')
 	driver6_temp_coordinates.push( nextPoint.geometry.coordinates )
 	
@@ -759,7 +1069,66 @@ function driver6_drawRoute () {
 	  	  });
 	}
 
-	if(driver6_temp_coordinates[driver6_temp_coordinates.length-1][1] !=2.214076 || driver6_temp_coordinates[driver6_temp_coordinates.length-1][0] != 48.846782) {
+	if(!driver6_accident && (driver6_temp_coordinates[driver6_temp_coordinates.length-1][1] !=2.214076 || driver6_temp_coordinates[driver6_temp_coordinates.length-1][0] != 48.846782)) {
 		  requestAnimationFrame(driver6_drawRoute);
 	}	 
+}
+
+function addEventListenerDriver6(){
+	document.getElementById("driver6_delivered").addEventListener("click", function(event) {
+		if(!driver6_delivering && !driver6_stopped && !driver6_accident) {
+			driver6_delivering = true;
+			const el = document.createElement('div');
+			el.className = 'delivery_martker';
+	  		// make a marker for each feature and add to the map
+			new mapboxgl.Marker(el).setLngLat(driver6_temp_coordinates[driver6_temp_coordinates.length-1]).addTo(driver6_map);
+			deliveringDriver6();
+		}
+	});
+	
+	document.getElementById('driver6_not_delivered').addEventListener("click", function(event) {	
+		if(!driver6_delivering && !driver6_stopped && !driver6_accident) {
+			driver6_delivering = true;
+			const el = document.createElement('div');
+			el.className = 'delivery_failure_martker';
+	  		// make a marker for each feature and add to the map
+			new mapboxgl.Marker(el).setLngLat(driver6_temp_coordinates[driver6_temp_coordinates.length-1]).addTo(driver6_map);
+			deliveringDriver6();
+		}
+	});
+	
+	document.getElementById('driver6_stopped').addEventListener("click", function(event) {
+		if(!driver6_delivering && !driver6_stopped && !driver6_accident) {
+			driver6_stopped = true;
+			const el = document.createElement('div');
+			el.className = 'stopped_martker';
+	  		// make a marker for each feature and add to the map
+			new mapboxgl.Marker(el).setLngLat(driver6_temp_coordinates[driver6_temp_coordinates.length-1]).addTo(driver6_map);
+			stoppedDriver6();
+		}
+	});
+	
+	document.getElementById('driver6_accident').addEventListener("click", function(event) {
+		if(!driver6_delivering && !driver6_stopped && !driver6_accident) {
+			driver6_accident = true;
+			const el = document.createElement('div');
+			el.className = 'accident_martker';
+	  		// make a marker for each feature and add to the map
+			new mapboxgl.Marker(el).setLngLat(driver6_temp_coordinates[driver6_temp_coordinates.length-1]).addTo(driver6_map);
+		}
+	});
+}
+
+async function deliveringDriver6() {
+	var millisecondsToWait = Math.floor(Math.random() * 100001);
+	setTimeout(function() {
+	    driver6_delivering = false;
+	}, millisecondsToWait);
+}
+
+async function stoppedDriver6() {
+	var millisecondsToWait = Math.floor(Math.random() * 100001);
+	setTimeout(function() {
+	    driver6_stopped = false;
+	}, millisecondsToWait);
 }

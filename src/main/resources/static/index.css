@@ -274,8 +274,53 @@ body {
   cursor: pointer;
 }
 
-.truck_martker {
-  background-image: url('truck.png');
+.truck1_martker {
+  background-image: url('truck1.png');
+  background-size: cover;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.truck2_martker {
+  background-image: url('truck2.png');
+  background-size: cover;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.truck3_martker {
+  background-image: url('truck3.png');
+  background-size: cover;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.truck4_martker {
+  background-image: url('truck4.png');
+  background-size: cover;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.truck5_martker {
+  background-image: url('truck5.png');
+  background-size: cover;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.truck6_martker {
+  background-image: url('truck6.png');
   background-size: cover;
   width: 50px;
   height: 50px;
