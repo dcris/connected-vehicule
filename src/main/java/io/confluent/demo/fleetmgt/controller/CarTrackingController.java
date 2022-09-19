@@ -20,9 +20,11 @@ import org.springframework.stereotype.Controller;
 import com.github.javafaker.Faker;
 import com.opencsv.CSVReader;
 
+import io.confluent.demo.fleetmgt.model.CarDeliveringEvent;
+import io.confluent.demo.fleetmgt.model.CarDeliveryStatusEvent;
 import io.confluent.demo.fleetmgt.model.CarTrackingInfo;
 
-@EnableScheduling
+//@EnableScheduling
 @Controller
 public class CarTrackingController {
 	
@@ -30,39 +32,31 @@ public class CarTrackingController {
     private SimpMessagingTemplate template;
 	
 	private final Faker faker = new Faker(new Locale("en-US"));
-	private final List<CarTrackingInfo> data = Arrays.asList(new CarTrackingInfo(48.831081, 2.0770324),
-            new CarTrackingInfo(48.8255436,2.125355),
-            new CarTrackingInfo(48.7967555,2.1177344),
-            new CarTrackingInfo(48.7948532,2.0553037));
+//	private final List<CarTrackingInfo> data = Arrays.asList(new CarTrackingInfo(48.831081, 2.0770324),
+//            new CarTrackingInfo(48.8255436,2.125355),
+//            new CarTrackingInfo(48.7967555,2.1177344),
+//            new CarTrackingInfo(48.7948532,2.0553037));
 	
 	private final Path filePath = Paths.get("/Users/cdubois/confluent-dev/kafka-producer/drivers/driver-2.csv");
 	private List<String[]> list = null;
-	
-	
-	
-	public CarTrackingController() {
-		super();
-		try {
-			list = readLineByLine(filePath);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+//	
+//	
+//	
+//	public CarTrackingController() {
+//		super();
+//		try {
+//			list = readLineByLine(filePath);
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//	}
 
 	//	@MessageMapping("/track")
 //	@SendTo("/topic/info")
-	@Scheduled(fixedRate = 1000)
+	/*@Scheduled(fixedRate = 1000)
 	private void pushCarInfo() throws Exception {
-		/*for(CarTrackingInfo carTrackingInfo:data) {
-			Thread.sleep(1000);
-			return carTrackingInfo;
-		}*/
 		
-		/*while (true) {
-			Thread.sleep(1000);
-			this.template.convertAndSend("/topic/info", new CarTrackingInfo(Double.valueOf(faker.address().latitude()), Double.valueOf(faker.address().longitude())));
-		}*/
 		int i = 0;
 		for(String[] line:list) {
 			//this.template.convertAndSend("/topic/info", new CarTrackingInfo(Double.valueOf(faker.address().latitude()), Double.valueOf(faker.address().longitude())));
@@ -83,27 +77,20 @@ public class CarTrackingController {
 	        }
 	    }
 	    return list;
-	}
+	}*/
 
 	@MessageMapping("/track")
-	@SendTo("/topic/info")
-	private void trackCar() throws Exception {
-		/*for(CarTrackingInfo carTrackingInfo:data) {
-			Thread.sleep(1000);
-			return carTrackingInfo;
-		}*/
-		
-		/*while (true) {
-			Thread.sleep(1000);
-			this.template.convertAndSend("/topic/info", new CarTrackingInfo(Double.valueOf(faker.address().latitude()), Double.valueOf(faker.address().longitude())));
-		}*/
-		int i = 0;
-		for(String[] line:list) {
-			//this.template.convertAndSend("/topic/info", new CarTrackingInfo(Double.valueOf(faker.address().latitude()), Double.valueOf(faker.address().longitude())));
-			this.template.convertAndSend("/topic/info", new CarTrackingInfo(Double.valueOf(line[0]), Double.valueOf(line[1])));
-			i++;
-		}
-		
+	private void trackCar(CarTrackingInfo carTrackingInfo) throws Exception {
+		System.out.println(carTrackingInfo);
 	}
 
+	@MessageMapping("/delivering")
+	private void delivering(CarDeliveringEvent carDeliveringEvent) throws Exception {
+		System.out.println(carDeliveringEvent);
+	}
+	
+	@MessageMapping("/delivery_status")
+	private void deliveryStatus(CarDeliveryStatusEvent carDeliveryStatusEvent) throws Exception {
+		System.out.println(carDeliveryStatusEvent);
+	}
 }

@@ -72,31 +72,27 @@ var drive_line_paint = {
 	]
 }
 
-/*function connect() {
+function connect() {
     var socket = new SockJS('/gs-guide-websocket');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function (frame) {
-        //setConnected(true);
-        //sendName();
-        console.log('Connected: ' + frame);
-        var polyline = L.polyline([], {color: 'red'}).addTo(map);
+		renderMapDriver1();
+		renderMapDriver2();
+		renderMapDriver3();
+		renderMapDriver4();
+		renderMapDriver5();
+		renderMapDriver6();
+		
+		addEventListenerDriver1();
+		addEventListenerDriver2();
+		addEventListenerDriver3();
+		addEventListenerDriver4();
+		addEventListenerDriver5();
+		addEventListenerDriver6();
+        /*stompClient.subscribe('/topic/info', function (greeting) {
+
+        });*/
         
-        stompClient.subscribe('/topic/info', function (greeting) {
-			var cartrackinfo = JSON.parse(greeting.body);
-			var lat = cartrackinfo.latitude;
-			var lon = cartrackinfo.longitude;
-	   		if(firsttime) {
-				myMovingMarker = L.Marker.movingMarker([[lat, lon],[lat, lon]],
-                        [1000], {autostart: true, loop: false}).addTo(map);
-                firsttime = false;
-			} else {
-				myMovingMarker.addLatLng([lat, lon],1000);
-			}
-			
-			point = {lat: lat, lng: lon};
-			polyline.addLatLng(point);
-            console.log(JSON.parse(greeting.body).content);
-        });
     });
 }
 
@@ -106,24 +102,12 @@ function sendName() {
 
 function showGreeting(message) {
     $("#greetings").append("<tr><td>" + message + "</td></tr>");
-}*/
+}
 
 document.addEventListener('DOMContentLoaded', function(event){
 	mapboxgl.accessToken = 'pk.eyJ1IjoiYWxmcmVkb3dvbmEiLCJhIjoiY2w3c3M1NHVoMHM2MDNxcDJ5Z3JrYzRpaCJ9.iJBu83MKVgJzQEFvVdk9zw';
 	
-	renderMapDriver1();
-	renderMapDriver2();
-	renderMapDriver3();
-	renderMapDriver4();
-	renderMapDriver5();
-	renderMapDriver6();
-	
-	addEventListenerDriver1();
-	addEventListenerDriver2();
-	addEventListenerDriver3();
-	addEventListenerDriver4();
-	addEventListenerDriver5();
-	addEventListenerDriver6();
+	connect();
 });
 
 
@@ -192,6 +176,8 @@ function driver1_drawRoute () {
 	nextPoint= turf.along(driver1_path, driver1_drive_step , 'miles')
 	driver1_temp_coordinates.push( nextPoint.geometry.coordinates )
 	
+	stompClient.send("/app/track", {}, JSON.stringify({'driverID': 'driver1', coordinate: nextPoint.geometry.coordinates}));
+	
 	driver1_marker.setLngLat(nextPoint.geometry.coordinates);
 	driver1_map.flyTo({
 		center: nextPoint.geometry.coordinates,
@@ -243,8 +229,9 @@ function addEventListenerDriver1(){
 			const el = document.createElement('div');
 			el.className = 'delivery_martker';
 	  		// make a marker for each feature and add to the map
-			new mapboxgl.Marker(el).setLngLat(driver1_temp_coordinates[driver1_temp_coordinates.length-1]).addTo(driver1_map);
-			deliveringDriver1();
+	  		var coordinate = driver1_temp_coordinates[driver1_temp_coordinates.length-1];
+			var delivery_marker = new mapboxgl.Marker(el).setLngLat(coordinate).addTo(driver1_map);
+			deliveringDriver1(true, coordinate, delivery_marker);
 		}
 	});
 	
@@ -252,10 +239,11 @@ function addEventListenerDriver1(){
 		if(!driver1_delivering && !driver1_stopped && !driver1_accident) {
 			driver1_delivering = true;
 			const el = document.createElement('div');
-			el.className = 'delivery_failure_martker';
+			el.className = 'delivery_martker';
 	  		// make a marker for each feature and add to the map
-			new mapboxgl.Marker(el).setLngLat(driver1_temp_coordinates[driver1_temp_coordinates.length-1]).addTo(driver1_map);
-			deliveringDriver1();
+	  		var coordinate = driver1_temp_coordinates[driver1_temp_coordinates.length-1];
+			var delivery_marker = new mapboxgl.Marker(el).setLngLat(driver1_temp_coordinates[driver1_temp_coordinates.length-1]).addTo(driver1_map);
+			deliveringDriver1(false, coordinate, delivery_marker);
 		}
 	});
 	
@@ -281,9 +269,21 @@ function addEventListenerDriver1(){
 	});
 }
 
-async function deliveringDriver1() {
+async function deliveringDriver1(success, coordinate, delivery_marker) {
+	stompClient.send("/app/delivering", {}, JSON.stringify({'driverID': 'driver1', coordinate: nextPoint.geometry.coordinates, delivering: true}));
 	var millisecondsToWait = Math.floor(Math.random() * 100001);
 	setTimeout(function() {
+		delivery_marker.remove();
+		const el = document.createElement('div');
+		if(success) {
+			el.className = 'delivered_martker';
+		} else {
+			el.className = 'delivery_failure_martker';
+		}
+		
+  		// make a marker for each feature and add to the map
+		new mapboxgl.Marker(el).setLngLat(coordinate).addTo(driver1_map);
+		stompClient.send("/app/delivery_status", {}, JSON.stringify({'driverID': 'driver1', coordinate: nextPoint.geometry.coordinates, delivered: success, timeSpent: millisecondsToWait}));
 	    driver1_delivering = false;
 	}, millisecondsToWait);
 }
@@ -360,6 +360,8 @@ function driver2_drawRoute () {
 	nextPoint= turf.along(driver2_path, driver2_drive_step , 'miles')
 	driver2_temp_coordinates.push( nextPoint.geometry.coordinates )
 	
+	stompClient.send("/app/track", {}, JSON.stringify({'driverID': 'driver2', coordinate: nextPoint.geometry.coordinates}));
+	
 	driver2_marker.setLngLat(nextPoint.geometry.coordinates);
 	driver2_map.flyTo({
 		center: nextPoint.geometry.coordinates,
@@ -408,24 +410,24 @@ function addEventListenerDriver2(){
 	document.getElementById("driver2_delivered").addEventListener("click", function(event) {
 		if(!driver2_delivering && !driver2_stopped && !driver2_accident) {
 			driver2_delivering = true;
-			//<a href="https://www.flaticon.com/free-icons/truck" title="truck icons">Truck icons created by Freepik - Flaticon</a>
 			const el = document.createElement('div');
 			el.className = 'delivery_martker';
 	  		// make a marker for each feature and add to the map
-			new mapboxgl.Marker(el).setLngLat(driver2_temp_coordinates[driver2_temp_coordinates.length-1]).addTo(driver2_map);
-			deliveringDriver2();
+	  		var coordinate = driver2_temp_coordinates[driver2_temp_coordinates.length-1];
+			var delivery_marker = new mapboxgl.Marker(el).setLngLat(coordinate).addTo(driver2_map);
+			deliveringDriver2(true, coordinate, delivery_marker);
 		}
 	});
 	
 	document.getElementById('driver2_not_delivered').addEventListener("click", function(event) {	
 		if(!driver2_delivering && !driver2_stopped && !driver2_accident) {
 			driver2_delivering = true;
-			//<a href="https://www.flaticon.com/free-icons/truck" title="truck icons">Truck icons created by Freepik - Flaticon</a>
 			const el = document.createElement('div');
-			el.className = 'delivery_failure_martker';
+			el.className = 'delivery_martker';
 	  		// make a marker for each feature and add to the map
-			new mapboxgl.Marker(el).setLngLat(driver2_temp_coordinates[driver2_temp_coordinates.length-1]).addTo(driver2_map);
-			deliveringDriver2();
+	  		var coordinate = driver2_temp_coordinates[driver2_temp_coordinates.length-1];
+			var delivery_marker = new mapboxgl.Marker(el).setLngLat(driver2_temp_coordinates[driver2_temp_coordinates.length-1]).addTo(driver2_map);
+			deliveringDriver2(false, coordinate, delivery_marker);
 		}
 	});
 	
@@ -452,9 +454,21 @@ function addEventListenerDriver2(){
 	});
 }
 
-async function deliveringDriver2() {
+async function deliveringDriver2(success, coordinate, delivery_marker) {
+	stompClient.send("/app/delivering", {}, JSON.stringify({'driverID': 'driver2', coordinate: nextPoint.geometry.coordinates, delivering: true}));
 	var millisecondsToWait = Math.floor(Math.random() * 100001);
 	setTimeout(function() {
+		delivery_marker.remove();
+		const el = document.createElement('div');
+		if(success) {
+			el.className = 'delivered_martker';
+		} else {
+			el.className = 'delivery_failure_martker';
+		}
+		
+  		// make a marker for each feature and add to the map
+		new mapboxgl.Marker(el).setLngLat(coordinate).addTo(driver2_map);
+		stompClient.send("/app/delivery_status", {}, JSON.stringify({'driverID': 'driver2', coordinate: nextPoint.geometry.coordinates, delivered: success, timeSpent: millisecondsToWait}));
 	    driver2_delivering = false;
 	}, millisecondsToWait);
 }
@@ -531,6 +545,8 @@ function driver3_drawRoute () {
 	nextPoint= turf.along(driver3_path, driver3_drive_step , 'miles')
 	driver3_temp_coordinates.push( nextPoint.geometry.coordinates )
 	
+	stompClient.send("/app/track", {}, JSON.stringify({'driverID': 'driver3', coordinate: nextPoint.geometry.coordinates}));
+	
 	driver3_marker.setLngLat(nextPoint.geometry.coordinates);
 	driver3_map.flyTo({
 		center: nextPoint.geometry.coordinates,
@@ -582,8 +598,9 @@ function addEventListenerDriver3(){
 			const el = document.createElement('div');
 			el.className = 'delivery_martker';
 	  		// make a marker for each feature and add to the map
-			new mapboxgl.Marker(el).setLngLat(driver3_temp_coordinates[driver3_temp_coordinates.length-1]).addTo(driver3_map);
-			deliveringDriver3();
+	  		var coordinate = driver3_temp_coordinates[driver3_temp_coordinates.length-1];
+			var delivery_marker = new mapboxgl.Marker(el).setLngLat(coordinate).addTo(driver3_map);
+			deliveringDriver3(true, coordinate, delivery_marker);
 		}
 	});
 	
@@ -591,10 +608,11 @@ function addEventListenerDriver3(){
 		if(!driver3_delivering && !driver3_stopped && !driver3_accident) {
 			driver3_delivering = true;
 			const el = document.createElement('div');
-			el.className = 'delivery_failure_martker';
+			el.className = 'delivery_martker';
 	  		// make a marker for each feature and add to the map
-			new mapboxgl.Marker(el).setLngLat(driver3_temp_coordinates[driver3_temp_coordinates.length-1]).addTo(driver3_map);
-			deliveringDriver3();
+	  		var coordinate = driver3_temp_coordinates[driver3_temp_coordinates.length-1];
+			var delivery_marker = new mapboxgl.Marker(el).setLngLat(driver3_temp_coordinates[driver3_temp_coordinates.length-1]).addTo(driver3_map);
+			deliveringDriver3(false, coordinate, delivery_marker);
 		}
 	});
 	
@@ -620,9 +638,21 @@ function addEventListenerDriver3(){
 	});
 }
 
-async function deliveringDriver3() {
+async function deliveringDriver3(success, coordinate, delivery_marker) {
+	stompClient.send("/app/delivering", {}, JSON.stringify({'driverID': 'driver3', coordinate: nextPoint.geometry.coordinates, delivering: true}));
 	var millisecondsToWait = Math.floor(Math.random() * 100001);
 	setTimeout(function() {
+		delivery_marker.remove();
+		const el = document.createElement('div');
+		if(success) {
+			el.className = 'delivered_martker';
+		} else {
+			el.className = 'delivery_failure_martker';
+		}
+		
+  		// make a marker for each feature and add to the map
+		new mapboxgl.Marker(el).setLngLat(coordinate).addTo(driver3_map);
+		stompClient.send("/app/delivery_status", {}, JSON.stringify({'driverID': 'driver3', coordinate: nextPoint.geometry.coordinates, delivered: success, timeSpent: millisecondsToWait}));
 	    driver3_delivering = false;
 	}, millisecondsToWait);
 }
@@ -699,6 +729,8 @@ function driver4_drawRoute () {
 	nextPoint= turf.along(driver4_path, driver4_drive_step , 'miles')
 	driver4_temp_coordinates.push( nextPoint.geometry.coordinates )
 	
+	stompClient.send("/app/track", {}, JSON.stringify({'driverID': 'driver4', coordinate: nextPoint.geometry.coordinates}));
+	
 	driver4_marker.setLngLat(nextPoint.geometry.coordinates);
 	driver4_map.flyTo({
 		center: nextPoint.geometry.coordinates,
@@ -750,8 +782,9 @@ function addEventListenerDriver4(){
 			const el = document.createElement('div');
 			el.className = 'delivery_martker';
 	  		// make a marker for each feature and add to the map
-			new mapboxgl.Marker(el).setLngLat(driver4_temp_coordinates[driver4_temp_coordinates.length-1]).addTo(driver4_map);
-			deliveringDriver4();
+	  		var coordinate = driver4_temp_coordinates[driver4_temp_coordinates.length-1];
+			var delivery_marker = new mapboxgl.Marker(el).setLngLat(coordinate).addTo(driver4_map);
+			deliveringDriver4(true, coordinate, delivery_marker);
 		}
 	});
 	
@@ -759,10 +792,11 @@ function addEventListenerDriver4(){
 		if(!driver4_delivering && !driver4_stopped && !driver4_accident) {
 			driver4_delivering = true;
 			const el = document.createElement('div');
-			el.className = 'delivery_failure_martker';
+			el.className = 'delivery_martker';
 	  		// make a marker for each feature and add to the map
-			new mapboxgl.Marker(el).setLngLat(driver4_temp_coordinates[driver4_temp_coordinates.length-1]).addTo(driver4_map);
-			deliveringDriver4();
+	  		var coordinate = driver4_temp_coordinates[driver4_temp_coordinates.length-1];
+			var delivery_marker = new mapboxgl.Marker(el).setLngLat(driver4_temp_coordinates[driver4_temp_coordinates.length-1]).addTo(driver4_map);
+			deliveringDriver4(false, coordinate, delivery_marker);
 		}
 	});
 	
@@ -788,9 +822,21 @@ function addEventListenerDriver4(){
 	});
 }
 
-async function deliveringDriver4() {
+async function deliveringDriver4(success, coordinate, delivery_marker) {
+	stompClient.send("/app/delivering", {}, JSON.stringify({'driverID': 'driver4', coordinate: nextPoint.geometry.coordinates, delivering: true}));
 	var millisecondsToWait = Math.floor(Math.random() * 100001);
 	setTimeout(function() {
+		delivery_marker.remove();
+		const el = document.createElement('div');
+		if(success) {
+			el.className = 'delivered_martker';
+		} else {
+			el.className = 'delivery_failure_martker';
+		}
+		
+  		// make a marker for each feature and add to the map
+		new mapboxgl.Marker(el).setLngLat(coordinate).addTo(driver4_map);
+		stompClient.send("/app/delivery_status", {}, JSON.stringify({'driverID': 'driver4', coordinate: nextPoint.geometry.coordinates, delivered: success, timeSpent: millisecondsToWait}));
 	    driver4_delivering = false;
 	}, millisecondsToWait);
 }
@@ -867,6 +913,8 @@ function driver5_drawRoute () {
 	nextPoint= turf.along(driver5_path, driver5_drive_step , 'miles')
 	driver5_temp_coordinates.push( nextPoint.geometry.coordinates )
 	
+	stompClient.send("/app/track", {}, JSON.stringify({'driverID': 'driver5', coordinate: nextPoint.geometry.coordinates}));
+	
 	driver5_marker.setLngLat(nextPoint.geometry.coordinates);
 	driver5_map.flyTo({
 		center: nextPoint.geometry.coordinates,
@@ -918,8 +966,9 @@ function addEventListenerDriver5(){
 			const el = document.createElement('div');
 			el.className = 'delivery_martker';
 	  		// make a marker for each feature and add to the map
-			new mapboxgl.Marker(el).setLngLat(driver5_temp_coordinates[driver5_temp_coordinates.length-1]).addTo(driver5_map);
-			deliveringDriver5();
+	  		var coordinate = driver5_temp_coordinates[driver5_temp_coordinates.length-1];
+			var delivery_marker = new mapboxgl.Marker(el).setLngLat(coordinate).addTo(driver5_map);
+			deliveringDriver5(true, coordinate, delivery_marker);
 		}
 	});
 	
@@ -927,10 +976,11 @@ function addEventListenerDriver5(){
 		if(!driver5_delivering && !driver5_stopped && !driver5_accident) {
 			driver5_delivering = true;
 			const el = document.createElement('div');
-			el.className = 'delivery_failure_martker';
+			el.className = 'delivery_martker';
 	  		// make a marker for each feature and add to the map
-			new mapboxgl.Marker(el).setLngLat(driver5_temp_coordinates[driver5_temp_coordinates.length-1]).addTo(driver5_map);
-			deliveringDriver5();
+	  		var coordinate = driver5_temp_coordinates[driver5_temp_coordinates.length-1];
+			var delivery_marker = new mapboxgl.Marker(el).setLngLat(driver5_temp_coordinates[driver5_temp_coordinates.length-1]).addTo(driver5_map);
+			deliveringDriver5(false, coordinate, delivery_marker);
 		}
 	});
 	
@@ -956,9 +1006,21 @@ function addEventListenerDriver5(){
 	});
 }
 
-async function deliveringDriver5() {
+async function deliveringDriver5(success, coordinate, delivery_marker) {
+	stompClient.send("/app/delivering", {}, JSON.stringify({'driverID': 'driver5', coordinate: nextPoint.geometry.coordinates, delivering: true}));
 	var millisecondsToWait = Math.floor(Math.random() * 100001);
 	setTimeout(function() {
+		delivery_marker.remove();
+		const el = document.createElement('div');
+		if(success) {
+			el.className = 'delivered_martker';
+		} else {
+			el.className = 'delivery_failure_martker';
+		}
+		
+  		// make a marker for each feature and add to the map
+		new mapboxgl.Marker(el).setLngLat(coordinate).addTo(driver5_map);
+		stompClient.send("/app/delivery_status", {}, JSON.stringify({'driverID': 'driver5', coordinate: nextPoint.geometry.coordinates, delivered: success, timeSpent: millisecondsToWait}));
 	    driver5_delivering = false;
 	}, millisecondsToWait);
 }
@@ -1035,6 +1097,8 @@ function driver6_drawRoute () {
 	nextPoint= turf.along(driver6_path, driver6_drive_step , 'miles')
 	driver6_temp_coordinates.push( nextPoint.geometry.coordinates )
 	
+	stompClient.send("/app/track", {}, JSON.stringify({'driverID': 'driver6', coordinate: nextPoint.geometry.coordinates}));
+	
 	driver6_marker.setLngLat(nextPoint.geometry.coordinates);
 	driver6_map.flyTo({
 		center: nextPoint.geometry.coordinates,
@@ -1086,8 +1150,9 @@ function addEventListenerDriver6(){
 			const el = document.createElement('div');
 			el.className = 'delivery_martker';
 	  		// make a marker for each feature and add to the map
-			new mapboxgl.Marker(el).setLngLat(driver6_temp_coordinates[driver6_temp_coordinates.length-1]).addTo(driver6_map);
-			deliveringDriver6();
+	  		var coordinate = driver6_temp_coordinates[driver6_temp_coordinates.length-1];
+			var delivery_marker = new mapboxgl.Marker(el).setLngLat(coordinate).addTo(driver6_map);
+			deliveringDriver6(true, coordinate, delivery_marker);
 		}
 	});
 	
@@ -1095,10 +1160,11 @@ function addEventListenerDriver6(){
 		if(!driver6_delivering && !driver6_stopped && !driver6_accident) {
 			driver6_delivering = true;
 			const el = document.createElement('div');
-			el.className = 'delivery_failure_martker';
+			el.className = 'delivery_martker';
 	  		// make a marker for each feature and add to the map
-			new mapboxgl.Marker(el).setLngLat(driver6_temp_coordinates[driver6_temp_coordinates.length-1]).addTo(driver6_map);
-			deliveringDriver6();
+	  		var coordinate = driver6_temp_coordinates[driver6_temp_coordinates.length-1];
+			var delivery_marker = new mapboxgl.Marker(el).setLngLat(driver6_temp_coordinates[driver6_temp_coordinates.length-1]).addTo(driver6_map);
+			deliveringDriver6(false, coordinate, delivery_marker);
 		}
 	});
 	
@@ -1124,9 +1190,21 @@ function addEventListenerDriver6(){
 	});
 }
 
-async function deliveringDriver6() {
+async function deliveringDriver6(success, coordinate, delivery_marker) {
+	stompClient.send("/app/delivering", {}, JSON.stringify({'driverID': 'driver6', coordinate: nextPoint.geometry.coordinates, delivering: true}));
 	var millisecondsToWait = Math.floor(Math.random() * 100001);
 	setTimeout(function() {
+		delivery_marker.remove();
+		const el = document.createElement('div');
+		if(success) {
+			el.className = 'delivered_martker';
+		} else {
+			el.className = 'delivery_failure_martker';
+		}
+		
+  		// make a marker for each feature and add to the map
+		new mapboxgl.Marker(el).setLngLat(coordinate).addTo(driver6_map);
+		stompClient.send("/app/delivery_status", {}, JSON.stringify({'driverID': 'driver6', coordinate: nextPoint.geometry.coordinates, delivered: success, timeSpent: millisecondsToWait}));
 	    driver6_delivering = false;
 	}, millisecondsToWait);
 }

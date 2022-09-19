@@ -1,33 +1,27 @@
 package io.confluent.demo.fleetmgt.model;
 
 public class CarTrackingInfo {
-	private double latitude;
-	private double longitude;
+	private String driverID;
+	private double[] coordinate;
 	
 	public CarTrackingInfo() {
 		super();
 	}
-
-	public CarTrackingInfo(double latitude, double longitude) {
-		super();
-		this.latitude = latitude;
-		this.longitude = longitude;
-	}
 	
-	public double getLatitude() {
-		return latitude;
+	public String getDriverID() {
+		return driverID;
 	}
 
-	public void setLatitude(double latitude) {
-		this.latitude = latitude;
+	public void setDriverID(String driverID) {
+		this.driverID = driverID;
 	}
 	
-	public double getLongitude() {
-		return longitude;
+	public double[] getCoordinate() {
+		return coordinate;
 	}
-	
-	public void setLongitude(double longitude) {
-		this.longitude = longitude;
+
+	public void setCoordinate(double[] coordinate) {
+		this.coordinate = coordinate;
 	}
 	
 }
